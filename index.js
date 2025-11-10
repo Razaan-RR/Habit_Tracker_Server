@@ -1,12 +1,14 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb')
 const cors = require('cors')
 const app = express()
 const port = 3000
+
 app.use(cors())
 app.use(express.json())
 
-
+const uri =
+  'mongodb+srv://habits-db:hufJP8Hj40cZj0Ty@clusterpractice.wzcrq6x.mongodb.net/?appName=ClusterPractice'
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -14,12 +16,12 @@ const client = new MongoClient(uri, {
     version: ServerApiVersion.v1,
     strict: true,
     deprecationErrors: true,
-  }
-});
+  },
+})
 
 async function run() {
   try {
-    await client.connect();
+    await client.connect()
 
     const db = client.db('habits-db')
     const modelCollection = db.collection('habits')
@@ -32,14 +34,28 @@ async function run() {
       res.send(result)
     })
 
-    await client.db("admin").command({ ping: 1 });
-    console.log("Pinged your deployment. You successfully connected to MongoDB!");
+    // post method
+    // insertOne
+    // insertMany
+    app.post('/habits', async (req, res) => {
+      const data = req.body
+      // console.log(data)
+      const result = await modelCollection.insertOne(data)
+      res.send({
+        success: true,
+        result,
+      })
+    })
+
+    await client.db('admin').command({ ping: 1 })
+    console.log(
+      'Pinged your deployment. You successfully connected to MongoDB!'
+    )
   } finally {
     // await client.close();
   }
 }
-run().catch(console.dir);
-
+run().catch(console.dir)
 
 app.get('/', (req, res) => {
   res.send('Hello World!')
