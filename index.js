@@ -1,5 +1,5 @@
 const express = require('express')
-const { MongoClient, ServerApiVersion } = require('mongodb')
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const cors = require('cors')
 const app = express()
 const port = 3000
@@ -32,6 +32,15 @@ async function run() {
     app.get('/habits', async (req, res) => {
       const result = await modelCollection.find().toArray() //promise
       res.send(result)
+    })
+
+    app.get('/habits/:id', async (req, res) => {
+      const { id } = req.params
+      const habit = await modelCollection.findOne({ _id: new ObjectId(id) })
+      if (!habit) {
+        return res.status(404).json({ message: 'Habit not found' })
+      }
+      res.send(habit)
     })
 
     // post method
