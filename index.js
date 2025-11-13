@@ -60,8 +60,12 @@ async function run() {
       }
     })
 
-    app.get('/latest-habits', async(req, res)=>{
-      const result = await modelCollection.find().sort({createdAt: 'desc'}).limit(6).toArray()
+    app.get('/latest-habits', async (req, res) => {
+      const result = await modelCollection
+        .find()
+        .sort({ createdAt: 'desc' })
+        .limit(6)
+        .toArray()
       console.log(result)
       res.send(result)
     })
@@ -102,14 +106,13 @@ async function run() {
           })
 
           if (!alreadyCompleted) {
-            const updatedHistory = [
-              ...(existing.completionHistory || []),
-              { createdAt: new Date().toISOString() },
-            ]
-
             await modelCollection.updateOne(
               { _id: existing._id },
-              { $set: { completionHistory: updatedHistory } }
+              {
+                $push: {
+                  completionHistory: { createdAt: new Date().toISOString() },
+                },
+              }
             )
           }
 
@@ -119,7 +122,7 @@ async function run() {
         const newHabit = {
           ...habit,
           ownerEmail: userEmail,
-          ownerName: userName || 'Unknown User', 
+          ownerName: userName || 'Unknown User',
           completionHistory: [{ createdAt: new Date().toISOString() }],
           createdAt: new Date(),
           public: false,
