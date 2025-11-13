@@ -43,6 +43,23 @@ async function run() {
       res.send(habit)
     })
 
+    app.get('/categories', async (req, res) => {
+      try {
+        const categories = await modelCollection
+          .aggregate([
+            { $group: { _id: '$category' } },
+            { $project: { _id: 0, category: '$_id' } },
+          ])
+          .toArray()
+
+        const categoryList = ['All', ...categories.map((c) => c.category)]
+        res.send(categoryList)
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+        res.status(500).json({ message: 'Server error' })
+      }
+    })
+
     // post method
     // insertOne
     // insertMany
