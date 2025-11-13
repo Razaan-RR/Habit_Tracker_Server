@@ -60,6 +60,12 @@ async function run() {
       }
     })
 
+    app.get('/latest-habits', async(req, res)=>{
+      const result = await modelCollection.find().sort({createdAt: 'desc'}).limit(6).toArray()
+      console.log(result)
+      res.send(result)
+    })
+
     // post method
     // insertOne
     // insertMany
