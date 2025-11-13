@@ -73,6 +73,61 @@ async function run() {
       })
     })
 
+    app.post('/habits/complete', async (req, res) => {
+      try {
+        const { habit, userEmail, userName } = req.body
+        if (!habit || !userEmail) {
+          return res.status(400).json({ message: 'Missing habit or userEmail' })
+        }
+
+        const existing = await modelCollection.findOne({
+          title: habit.title,
+          ownerEmail: userEmail,
+        })
+
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        if (existing) {
+          const alreadyCompleted = existing.completionHistory?.some((entry) => {
+            const entryDate = new Date(entry.createdAt)
+            entryDate.setHours(0, 0, 0, 0)
+            return entryDate.getTime() === today.getTime()
+          })
+
+          if (!alreadyCompleted) {
+            const updatedHistory = [
+              ...(existing.completionHistory || []),
+              { createdAt: new Date().toISOString() },
+            ]
+
+            await modelCollection.updateOne(
+              { _id: existing._id },
+              { $set: { completionHistory: updatedHistory } }
+            )
+          }
+
+          return res.send({ message: 'Habit updated for user', updated: true })
+        }
+
+        const newHabit = {
+          ...habit,
+          ownerEmail: userEmail,
+          ownerName: userName || 'Unknown User', 
+          completionHistory: [{ createdAt: new Date().toISOString() }],
+          createdAt: new Date(),
+          public: false,
+        }
+        delete newHabit._id
+
+        const result = await modelCollection.insertOne(newHabit)
+        res.send({ message: 'Habit added for user', created: true, result })
+      } catch (error) {
+        console.error('Error completing habit:', error)
+        res.status(500).json({ message: 'Server error' })
+      }
+    })
+
     // Update - PUT
     // UpdateOne
     // UpdateMany
