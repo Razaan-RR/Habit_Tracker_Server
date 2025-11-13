@@ -3,12 +3,13 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 const cors = require('cors')
 const app = express()
 const port = 3000
-
+require("dotenv").config()
 app.use(cors())
 app.use(express.json())
 
+
 const uri =
-  'mongodb+srv://habits-db:hufJP8Hj40cZj0Ty@clusterpractice.wzcrq6x.mongodb.net/?appName=ClusterPractice'
+  `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@clusterpractice.wzcrq6x.mongodb.net/?appName=ClusterPractice`
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -180,7 +181,7 @@ async function run() {
 run().catch(console.dir)
 
 app.get('/', (req, res) => {
-  res.send('Hello World!')
+  res.send('Server is running!')
 })
 
 app.listen(port, () => {
